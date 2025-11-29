@@ -8,6 +8,7 @@ import (
 	"github.com/cloudwego/eino/components/tool"
 )
 
+// duck搜索工具配置与初始化
 var DuckDuckGo tool.InvokableTool
 
 func DuckDuckGoInit() {
@@ -17,7 +18,7 @@ func DuckDuckGoInit() {
 	cfg := &duckduckgo.Config{
 		ToolDesc:   "search for information by duckduckgo,and get url",
 		MaxResults: 3,
-		Region:     duckduckgo.RegionWT,
+		Region:     duckduckgo.RegionWT, //地区,没中国配置混蛋
 	}
 
 	duckduckgo, err := duckduckgo.NewTextSearchTool(ctx, cfg)

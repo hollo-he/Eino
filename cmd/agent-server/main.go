@@ -8,8 +8,9 @@ import (
 	"log"
 )
 
+// 主程序
 func main() {
-
+	//神秘启动仪式
 	utils.PrintBanner(`
 ██╗  ██╗ ██████╗ ██╗      ██╗      ██████╗ 
 ██║  ██║██╔═══██╗██║      ██║     ██╔═══██╗
@@ -22,7 +23,7 @@ func main() {
 `)
 
 	ctx := context.Background()
-
+	//模式初始化
 	llm.NewOllamaModel()
 
 	res, err := llm.OllamaChatModel.RunAgent(ctx, "你好,我想看看有关eino,直接把duckduckgo_text_search工具的结果原封不动给我就行")
@@ -30,4 +31,5 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("output:", res)
+
 }

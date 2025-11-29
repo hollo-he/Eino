@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// 配置,变量读取啥的
 type Config struct {
 	OllamaModelName string
 	OllamaUrl       string

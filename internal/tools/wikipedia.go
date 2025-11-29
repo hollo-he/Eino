@@ -8,6 +8,7 @@ import (
 	"github.com/cloudwego/eino/components/tool"
 )
 
+// 配置维基百科
 var WikipediaTool tool.InvokableTool
 
 func WikipediaInit() {
