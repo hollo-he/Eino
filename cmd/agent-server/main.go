@@ -25,7 +25,7 @@ func main() {
 
 	llm.NewOllamaModel()
 
-	res, err := llm.OllamaChatModel.RunAgent(ctx, "你好,我想看看有关eino,直接把duckduckgo_search工具的结果原封不动给我就行")
+	res, err := llm.OllamaChatModel.RunAgent(ctx, "你好,我想看看有关eino,直接把duckduckgo_text_search工具的结果原封不动给我就行")
 	if err != nil {
 		log.Fatal(err)
 	}

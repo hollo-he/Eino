@@ -89,7 +89,7 @@ func (o *Ollama) RunAgent(ctx context.Context, msg string) (string, error) {
 				return "", err
 			}
 			toolOutput = out
-		case "duckduckgo_search":
+		case "duckduckgo_text_search":
 			out, err := tools.DuckDuckGo.InvokableRun(ctx, toolCall.Function.Arguments)
 			if err != nil {
 				return "", err
