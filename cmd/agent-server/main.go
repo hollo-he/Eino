@@ -31,5 +31,6 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("output:", res)
-
+	utils.Edge_tts(res)
+	//utils.Win_tts(res)
 }
