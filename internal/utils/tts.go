@@ -48,9 +48,21 @@ func Edge_tts(text string) {
 
 func Win_tts(text string) {
 	// 直接调用 Windows PowerShell 的说话功能
-	psCommand := fmt.Sprintf(`Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('%s')`, text)
+
+	voiceName := "Microsoft Kangkang - Chinese (Simplified, PRC)"
+
+	psCommand := fmt.Sprintf(`
+        Add-Type -AssemblyName System.Speech; 
+        $s = New-Object System.Speech.Synthesis.SpeechSynthesizer; 
+        $s.SelectVoice('%s'); 
+        $s.Speak('%s')
+    `, voiceName, text)
 
 	cmd := exec.Command("powershell", "-Command", psCommand)
+
+	//psCommand := fmt.Sprintf(`Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('%s')`, text)
+	//
+	//cmd := exec.Command("powershell", "-Command", psCommand)
 
 	fmt.Println("正在说话...")
 	err := cmd.Run()

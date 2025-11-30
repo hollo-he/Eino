@@ -5,23 +5,29 @@ import (
 	"log"
 
 	"github.com/cloudwego/eino-ext/components/tool/wikipedia"
-	"github.com/cloudwego/eino/components/tool"
 )
 
 // 配置维基百科
-var WikipediaTool tool.InvokableTool
 
-func WikipediaInit() {
+func WikipediaInit() string {
 
 	ctx := context.Background()
 
 	cfg := &wikipedia.Config{
 		Language: "zh",
+		ToolName: "wikipedia_search",
 	}
 
 	wikipediaTool, err := wikipedia.NewTool(ctx, cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	WikipediaTool = wikipediaTool
+
+	wikiinfo, err := wikipediaTool.Info(ctx)
+	if err != nil {
+		log.Fatal("维基百科注册:", err)
+	}
+	Register(wikiinfo, wikipediaTool)
+
+	return wikiinfo.Name
 }

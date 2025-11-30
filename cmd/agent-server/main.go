@@ -26,11 +26,11 @@ func main() {
 	//模式初始化
 	llm.NewOllamaModel()
 
-	res, err := llm.OllamaChatModel.RunAgent(ctx, "你好,我想看看有关eino,直接把duckduckgo_text_search工具的结果原封不动给我就行")
+	res, err := llm.OllamaChatModel.RunAgent(ctx, "你好,我想了解一下李白")
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("output:", res)
-	utils.Edge_tts(res)
-	//utils.Win_tts(res)
+	//utils.Edge_tts(res)
+	utils.Win_tts(res)
 }

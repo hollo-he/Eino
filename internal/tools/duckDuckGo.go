@@ -5,13 +5,11 @@ import (
 	"log"
 
 	"github.com/cloudwego/eino-ext/components/tool/duckduckgo/v2"
-	"github.com/cloudwego/eino/components/tool"
 )
 
 // duck搜索工具配置与初始化
-var DuckDuckGo tool.InvokableTool
 
-func DuckDuckGoInit() {
+func DuckDuckGoInit() string {
 
 	ctx := context.Background()
 
@@ -19,11 +17,20 @@ func DuckDuckGoInit() {
 		ToolDesc:   "search for information by duckduckgo,and get url",
 		MaxResults: 3,
 		Region:     duckduckgo.RegionWT, //地区,没中国配置混蛋
+		ToolName:   "duckduckgo_text_search",
 	}
 
 	duckduckgo, err := duckduckgo.NewTextSearchTool(ctx, cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	DuckDuckGo = duckduckgo
+
+	duckgoInfo, err := duckduckgo.Info(ctx)
+	if err != nil {
+		log.Fatal("duckgosearch注册:", err)
+	}
+
+	Register(duckgoInfo, duckduckgo)
+
+	return duckgoInfo.Name
 }

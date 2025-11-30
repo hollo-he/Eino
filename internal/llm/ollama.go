@@ -30,24 +30,9 @@ func NewOllamaModel() {
 		log.Printf("NewChatModel failed, err=%v\n", err)
 	}
 
-	//工具配置
-
-	//维基百科📚
-	tools.WikipediaInit()
-	wikiinfo, err := tools.WikipediaTool.Info(ctx)
-	if err != nil {
-		log.Printf("Wikipedia tool info failed, err=%v\n", err)
-	}
-
-	//duck搜索🔍
-	tools.DuckDuckGoInit()
-	duckduckgo, err := tools.DuckDuckGo.Info(ctx)
-	if err != nil {
-		log.Printf("DuckDuckGo info failed, err=%v\n", err)
-	}
-
 	//整合,创建工具箱
-	toolInfo := []*schema.ToolInfo{wikiinfo, duckduckgo}
+	tools.AllToolInit()
+	toolInfo := tools.AllToolInfo()
 	if err := model.BindTools(toolInfo); err != nil {
 		log.Printf("model bind tools failed, err=%v\n", err)
 	}
@@ -78,14 +63,15 @@ func (o *Ollama) RunAgent(ctx context.Context, msg string) (string, error) {
 	//消息体
 	message := []*schema.Message{
 		{
+			//系统提示词
+			Role: schema.System,
+			Content: "你是一个 ReAct Agent。用户每次提问你必须使用工具!" +
+				"你可以使用以下工具：维基百科(wikipedia_search)、DuckDuckGo(duckduckgo_text_search)。",
+		},
+		{
 			//用户提示词
 			Role:    schema.User,
 			Content: msg,
-		},
-		{
-			//系统提示词
-			Role:    schema.System,
-			Content: "请务必先使用符合条件的工具后,再回答用户问题,不管问题多简单,你能使用的工具有wikipedia_search跟duckduckgo_search,一个是维基百科查询,一个是搜索引擎获取网页链接",
 		},
 	}
 	for {
@@ -99,28 +85,19 @@ func (o *Ollama) RunAgent(ctx context.Context, msg string) (string, error) {
 		if len(res.ToolCalls) == 0 {
 			return res.String(), nil
 		}
-		toolCall := res.ToolCalls[0]
 
 		//工具输出
-		var toolOutput string
-		switch toolCall.Function.Name {
-		case "wikipedia_search":
-			out, err := tools.WikipediaTool.InvokableRun(ctx, toolCall.Function.Arguments)
-			if err != nil {
-				return "", err
-			}
-			toolOutput = out
-		case "duckduckgo_text_search":
-			out, err := tools.DuckDuckGo.InvokableRun(ctx, toolCall.Function.Arguments)
-			if err != nil {
-				return "", err
-			}
-			toolOutput = out
-		default:
-			toolOutput = res.String()
+		toolCall := res.ToolCalls[0]
+		args := toolCall.Function.Arguments
+		name := toolCall.Function.Name
+
+		out, err := tools.RunTool(ctx, name, args)
+		if err != nil {
+			return "", err
 		}
 
 		//将结果与开始对话内容一起给大模型
+
 		message = append(message, &schema.Message{
 			Role:      schema.Assistant,
 			ToolCalls: res.ToolCalls,
@@ -128,7 +105,7 @@ func (o *Ollama) RunAgent(ctx context.Context, msg string) (string, error) {
 			&schema.Message{
 				Role:    schema.Tool,
 				Name:    toolCall.Function.Name,
-				Content: toolOutput,
+				Content: out,
 			})
 	}
 }
