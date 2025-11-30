@@ -26,3 +26,11 @@ func RunTool(ctx context.Context, name, args string) (string, error) {
 func AllToolInfo() []*schema.ToolInfo {
 	return toolInfos
 }
+func GetToolInfo(name string) (*schema.ToolInfo, error) {
+	for _, toolInfo := range toolInfos {
+		if toolInfo.Name == name {
+			return toolInfo, nil
+		}
+	}
+	return nil, errors.New("No Such Tool:" + name)
+}

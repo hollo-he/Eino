@@ -1,7 +1,7 @@
 package server
 
 import (
-	"Eino/internal/llm"
+	"Eino/internal/agent"
 	"Eino/internal/utils"
 	"context"
 	"net/http"
@@ -10,7 +10,8 @@ import (
 )
 
 type AgentRequest struct {
-	Query string `json:"query"`
+	AgentName string `json:"agentName"`
+	Query     string `json:"query"`
 }
 
 type AgentResponse struct {
@@ -29,7 +30,16 @@ func New() *gin.Engine {
 		}
 
 		ctx := context.Background()
-		answer, err := llm.OllamaChatModel.RunAgent(ctx, req.Query)
+		agName := req.AgentName
+		if agName == "" {
+			agName = "default"
+		}
+		ag, ok := agent.GlobalAgents[agName]
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "agent not found: " + agName})
+			return
+		}
+		answer, err := ag.RunAgent(ctx, req.Query)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
