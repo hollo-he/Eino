@@ -2,9 +2,8 @@ package main
 
 import (
 	"Eino/internal/llm"
+	"Eino/internal/server"
 	"Eino/internal/utils"
-	"context"
-
 	"log"
 )
 
@@ -22,15 +21,12 @@ func main() {
          欢迎启动 Hollow 智能 Agent 🚀
 `)
 
-	ctx := context.Background()
 	//模式初始化
 	llm.NewOllamaModel()
 
-	res, err := llm.OllamaChatModel.RunAgent(ctx, "你好,我想了解一下李白")
-	if err != nil {
+	r := server.New()
+	log.Println("Agent HTTP 服务启动，监听端口 8080")
+	if err := r.Run(":8080"); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("output:", res)
-	//utils.Edge_tts(res)
-	utils.Win_tts(res)
 }
