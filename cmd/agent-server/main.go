@@ -19,8 +19,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("New searchAgent failed: %v", err)
 	}
-	agent.GlobalAgents["wikipedia_search"] = searchAgent
+	agent.GlobalAgents["search"] = searchAgent
 	agent.GlobalAgents["default"] = searchAgent
+	log.Println(agent.GlobalAgents)
 
 	//神秘启动仪式
 	r := server.New()

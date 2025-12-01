@@ -4,6 +4,8 @@ import (
 	"Eino/internal/llm"
 	"Eino/internal/tools"
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/cloudwego/eino/schema"
 )
@@ -15,10 +17,11 @@ var (
 )
 
 type Agent struct {
-	Name      string
-	ToolNames []string
-	ToolInfos []*schema.ToolInfo
-	Model     *llm.Ollama
+	Name         string
+	SystemPrompt string
+	ToolNames    []string
+	ToolInfos    []*schema.ToolInfo
+	Model        *llm.Ollama
 }
 
 var GlobalAgents = map[string]*Agent{}
@@ -41,16 +44,23 @@ func NewAgent(name string, toolNames []string) (*Agent, error) {
 		toolinfos = append(toolinfos, ti)
 	}
 
+	//提示词获取
+	promptPath := fmt.Sprintf("internal/agent/prompt/%sprompt.md", name)
+	content, err := os.ReadFile(promptPath)
+	if err != nil {
+		return nil, fmt.Errorf("无法读取 %s 的 system prompt: %v", name, err)
+	}
+
 	ag := &Agent{
-		Name:      name,
-		ToolNames: toolNames,
-		ToolInfos: toolinfos,
-		Model:     llm.OllamaChatModel,
+		Name:         name,
+		SystemPrompt: string(content),
+		ToolNames:    toolNames,
+		ToolInfos:    toolinfos,
+		Model:        llm.OllamaChatModel,
 	}
 
 	if err := ag.Model.Model.BindTools(toolinfos); err != nil {
 		return nil, err
 	}
-
 	return ag, nil
 }

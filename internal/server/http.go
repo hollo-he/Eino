@@ -4,6 +4,7 @@ import (
 	"Eino/internal/agent"
 	"Eino/internal/utils"
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,7 @@ func New() *gin.Engine {
 
 	router := gin.Default()
 
-	router.POST("/agent/run", func(c *gin.Context) {
+	router.POST("/agent/:Agentname/run", func(c *gin.Context) {
 		var req AgentRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -30,7 +31,8 @@ func New() *gin.Engine {
 		}
 
 		ctx := context.Background()
-		agName := req.AgentName
+		agName := c.Param("Agentname")
+		log.Printf("Agent name: %s", agName)
 		if agName == "" {
 			agName = "default"
 		}
@@ -45,9 +47,9 @@ func New() *gin.Engine {
 			return
 		}
 
-		//utils.Edge_tts(res)
+		utils.Edge_tts(answer)
 
-		go utils.Win_tts(answer)
+		//go utils.Win_tts(answer)
 
 		c.JSON(http.StatusOK, gin.H{"answer": answer})
 

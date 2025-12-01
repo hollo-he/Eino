@@ -27,7 +27,7 @@ func (ag *Agent) Chat(ctx context.Context, msg string) (string, error) {
 // 带工具的
 func (ag *Agent) RunAgent(ctx context.Context, msg string) (string, error) {
 
-	systemPrompt := "你是一个 ReAct Agent。用户每次提问你必须使用工具!你可以使用以下工具：维基百科(wikipedia_search)、DuckDuckGo(duckduckgo_text_search)。"
+	systemPrompt := ag.SystemPrompt
 
 	//消息体
 	message := []*schema.Message{
@@ -43,7 +43,7 @@ func (ag *Agent) RunAgent(ctx context.Context, msg string) (string, error) {
 			return "", err
 		}
 		if len(res.ToolCalls) == 0 {
-			return res.String(), nil
+			return res.Content, nil
 		}
 
 		//工具输出
