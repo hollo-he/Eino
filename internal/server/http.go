@@ -2,7 +2,6 @@ package server
 
 import (
 	"Eino/internal/agent"
-	"Eino/internal/utils"
 	"context"
 	"log"
 	"net/http"
@@ -47,7 +46,7 @@ func New() *gin.Engine {
 			return
 		}
 
-		utils.Edge_tts(answer)
+		//utils.Edge_tts(answer)
 
 		//go utils.Win_tts(answer)
 

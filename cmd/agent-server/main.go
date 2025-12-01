@@ -23,6 +23,9 @@ func main() {
 	agent.GlobalAgents["default"] = searchAgent
 	log.Println(agent.GlobalAgents)
 
+	//会话初始化
+	agent.InitSession()
+
 	//神秘启动仪式
 	r := server.New()
 	log.Println("欢迎启动 Hollow 智能 Agent 🚀，监听端口 8080")

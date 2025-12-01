@@ -27,13 +27,16 @@ func (ag *Agent) Chat(ctx context.Context, msg string) (string, error) {
 // 带工具的
 func (ag *Agent) RunAgent(ctx context.Context, msg string) (string, error) {
 
+	user := schema.Message{Role: schema.User, Content: msg}
+	GlobalSession.AddMessage(&user)
+
 	systemPrompt := ag.SystemPrompt
 
 	//消息体
 	message := []*schema.Message{
 		{Role: schema.System, Content: systemPrompt},
-		{Role: schema.User, Content: msg},
 	}
+	message = append(message, GlobalSession.Messages...)
 	for {
 		//提问->打算用的工具->开用->工具结果->大模型给出回复
 
@@ -43,6 +46,7 @@ func (ag *Agent) RunAgent(ctx context.Context, msg string) (string, error) {
 			return "", err
 		}
 		if len(res.ToolCalls) == 0 {
+			GlobalSession.AddMessage(res)
 			return res.Content, nil
 		}
 
@@ -67,10 +71,17 @@ func (ag *Agent) RunAgent(ctx context.Context, msg string) (string, error) {
 		}
 
 		//将结果与开始对话内容一起给大模型
+		assistantToolCallMSG := &schema.Message{
+			Role:      schema.Assistant,
+			ToolCalls: res.ToolCalls,
+		}
+		toolmsg := &schema.Message{Role: schema.Tool, Name: toolCall.Function.Name, Content: out}
 
-		message = append(message, &schema.Message{Role: schema.Assistant, ToolCalls: res.ToolCalls},
-			&schema.Message{Role: schema.Tool, Name: toolCall.Function.Name, Content: out})
+		message = append(message, assistantToolCallMSG, toolmsg)
+		GlobalSession.AddMessage(assistantToolCallMSG)
+		GlobalSession.AddMessage(toolmsg)
 	}
+
 }
 
 func (a *Agent) isToolAllowed(name string) bool {
