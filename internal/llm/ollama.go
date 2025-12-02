@@ -14,6 +14,7 @@ type Ollama struct {
 	Model *ollama.ChatModel
 }
 
+var OllamaToolModel *Ollama
 var OllamaChatModel *Ollama
 
 func NewOllamaModel() {
@@ -21,23 +22,32 @@ func NewOllamaModel() {
 	//配置设置
 	ctx := context.Background()
 	config.Load()
-	model, err := ollama.NewChatModel(ctx, &ollama.ChatModelConfig{
+	toolmodel, err := ollama.NewChatModel(ctx, &ollama.ChatModelConfig{
 		BaseURL: config.Cfg.OllamaUrl,
-		Model:   config.Cfg.OllamaModelName,
+		Model:   config.Cfg.OllamaToolModelName,
 	})
 	if err != nil {
-		log.Printf("NewChatModel failed, err=%v\n", err)
+		log.Printf("NewToolModel failed, err=%v\n", err)
+	}
+	chatmodel, err := ollama.NewChatModel(ctx, &ollama.ChatModelConfig{
+		BaseURL: config.Cfg.OllamaUrl,
+		Model:   config.Cfg.OllamaChatModelName,
+	})
+	if err != nil {
+		log.Println("NewChatModel failed, err=", err)
 	}
 
 	//整合,创建工具箱
 	tools.AllToolInit()
 	toolInfo := tools.AllToolInfo()
-	if err := model.BindTools(toolInfo); err != nil {
+	if err := toolmodel.BindTools(toolInfo); err != nil {
 		log.Printf("model bind tools failed, err=%v\n", err)
 	}
 
-	OllamaChatModel = &Ollama{
-		Model: model,
+	OllamaToolModel = &Ollama{
+		Model: toolmodel,
 	}
-
+	OllamaChatModel = &Ollama{
+		Model: chatmodel,
+	}
 }

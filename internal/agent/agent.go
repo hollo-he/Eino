@@ -21,16 +21,16 @@ type Agent struct {
 	SystemPrompt string
 	ToolNames    []string
 	ToolInfos    []*schema.ToolInfo
-	Model        *llm.Ollama
+	Model        *llm.Glm
 }
 
 var GlobalAgents = map[string]*Agent{}
 
-// agent构建(主要是工具的调用的选择)
-func NewAgent(name string, toolNames []string) (*Agent, error) {
+// NewToolAgent toolagent构建(主要是工具的调用的选择)
+func NewToolAgent(name string, toolNames []string) (*Agent, error) {
 
 	//模型(脑子🧠)在不在
-	if llm.OllamaChatModel.Model == nil {
+	if llm.GlmModel.Model == nil {
 		return nil, ErrModelNotReady
 	}
 
@@ -56,11 +56,34 @@ func NewAgent(name string, toolNames []string) (*Agent, error) {
 		SystemPrompt: string(content),
 		ToolNames:    toolNames,
 		ToolInfos:    toolinfos,
-		Model:        llm.OllamaChatModel,
+		Model:        llm.GlmModel,
 	}
 
 	if err := ag.Model.Model.BindTools(toolinfos); err != nil {
 		return nil, err
+	}
+	return ag, nil
+}
+
+// NewChatAgent chatagent构建
+func NewChatAgent(name string) (*Agent, error) {
+
+	//模型(脑子🧠)在不在
+	if llm.GlmModel.Model == nil {
+		return nil, ErrModelNotReady
+	}
+
+	//提示词获取
+	promptPath := fmt.Sprintf("internal/agent/prompt/%sprompt.md", name)
+	content, err := os.ReadFile(promptPath)
+	if err != nil {
+		return nil, fmt.Errorf("无法读取 %s 的 system prompt: %v", name, err)
+	}
+
+	ag := &Agent{
+		Name:         name,
+		SystemPrompt: string(content),
+		Model:        llm.GlmModel,
 	}
 	return ag, nil
 }
