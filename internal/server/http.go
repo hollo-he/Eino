@@ -3,6 +3,7 @@ package server
 import (
 	"Eino/internal/agent"
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -40,18 +41,32 @@ func New() *gin.Engine {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "agent not found: " + agName})
 			return
 		}
-		answer, err := ag.RunAgent(ctx, req.Query)
+
+		// === 设置 SSE 流式返回 ===
+		c.Writer.Header().Set("Content-Type", "text/event-stream")
+		c.Writer.Header().Set("Cache-Control", "no-cache")
+		c.Writer.Header().Set("Connection", "keep-alive")
+		c.Writer.Flush()
+
+		// === 流式运行 ===
+		finalReply, err := ag.RunAgent(ctx, req.Query, func(chunk string) {
+			// 每一个 token 回调时发送给前端
+			fmt.Fprintf(c.Writer, "data: %s", chunk)
+			c.Writer.Flush()
+		})
+
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			fmt.Fprintf(c.Writer, "data: [ERROR] %s\n\n", err.Error())
+			c.Writer.Flush()
 			return
 		}
 
-		//utils.Edge_tts(answer)
+		// 最终结束（可选发送一个 [DONE]）
+		fmt.Fprintf(c.Writer, "data: [DONE]\n\n")
+		c.Writer.Flush()
 
-		//go utils.Win_tts(answer)
-
-		c.JSON(http.StatusOK, gin.H{"answer": answer})
-
+		// （如果你想也可以写入 session 的最终回复，此时 finalReply 已经是完整回复）
+		_ = finalReply
 	})
 
 	return router

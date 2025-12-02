@@ -3,6 +3,7 @@ package agent
 import (
 	"Eino/internal/tools"
 	"context"
+	"io"
 	"log"
 
 	"github.com/cloudwego/eino/schema"
@@ -60,7 +61,7 @@ func (ag *Agent) ToolAgent(ctx context.Context, msg *schema.Message) (string, st
 }
 
 // 带工具的
-func (ag *Agent) RunAgent(ctx context.Context, msg string) (string, error) {
+func (ag *Agent) RunAgent(ctx context.Context, msg string, onChunk func(string2 string)) (string, error) {
 
 	user := schema.Message{Role: schema.User, Content: msg}
 	GlobalSession.AddMessage(&user)
@@ -84,12 +85,43 @@ func (ag *Agent) RunAgent(ctx context.Context, msg string) (string, error) {
 
 	message = append(message, toolmsg)
 	GlobalSession.AddMessage(toolmsg)
-	res, err := ag.Model.Model.Generate(ctx, message)
+	res, err := ag.Model.Model.Stream(ctx, message)
 	if err != nil {
 		return "", err
 	}
-	log.Println("chat回复", res)
-	return res.Content, nil
+	defer res.Close()
+	var finalReply string
+
+	for {
+		chunk, err := res.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", err
+		}
+
+		text := chunk.Content
+		finalReply += text
+
+		// ⬅⬅⬅ 关键：将流式输出通过回调返回
+		if onChunk != nil {
+			onChunk(text)
+		}
+	}
+
+	//////////////////////////////
+	// 4) 写入 session
+	//////////////////////////////
+	GlobalSession.AddMessage(&schema.Message{
+		Role:    schema.Assistant,
+		Content: finalReply,
+	})
+
+	//////////////////////////////
+	// 5) 最终 return（一般不会给前端，只是内部保存）
+	//////////////////////////////
+	return finalReply, nil
 }
 
 func (a *Agent) isToolAllowed(name string) bool {
