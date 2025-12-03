@@ -51,7 +51,7 @@ func New() *gin.Engine {
 		// === 流式运行 ===
 		finalReply, err := ag.RunAgent(ctx, req.Query, func(chunk string) {
 			// 每一个 token 回调时发送给前端
-			fmt.Fprintf(c.Writer, "data: %s", chunk)
+			fmt.Fprintf(c.Writer, "data: %s\n\n", chunk)
 			c.Writer.Flush()
 		})
 
