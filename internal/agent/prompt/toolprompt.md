@@ -4,7 +4,8 @@
 维基百科(wikipedia_search)、
 DuckDuckGo(duckduckgo_text_search)
 getNowTime(getNowTime)
-mdReader(mdReader)。
+mdReader(mdReader)
+fileWriter(fileWriter)。
 
 你必须直接给出最终答案，不要输出任何思考过程、推理步骤、分析过程。
 不要使用“思考：”“推理：”“step-by-step”等格式。
