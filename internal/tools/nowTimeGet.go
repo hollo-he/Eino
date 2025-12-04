@@ -6,22 +6,17 @@ import (
 	"log"
 	"time"
 
+	"Eino/internal/tools/toolschema"
+
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/components/tool/utils"
 	"github.com/cloudwego/eino/schema"
 )
 
-type Result struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
-}
-
-type NowTimeReq struct{}
-
 // 工具函数（无参数）
-func NowTimeGet(ctx context.Context, req *NowTimeReq) (*Result, error) {
+func nowTimeGet(ctx context.Context, req *toolschema.NowTimeReq) (*toolschema.Result, error) {
 	nowtime := time.Now()
-	return &Result{
+	return &toolschema.Result{
 		Code: 200,
 		Msg:  fmt.Sprintf("当前时间是 %s", nowtime.Format("2006-01-02 15:04:05")),
 	}, nil
@@ -37,7 +32,7 @@ func NewNowTimeTool() tool.InvokableTool {
 				map[string]*schema.ParameterInfo{}, // 💡 无参数工具关键点
 			),
 		},
-		NowTimeGet,
+		nowTimeGet,
 	)
 }
 

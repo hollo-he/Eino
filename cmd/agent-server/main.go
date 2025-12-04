@@ -15,7 +15,7 @@ func main() {
 	llm.NewGlmModel()
 
 	//模式初始化
-	searchTools := []string{"wikipedia_search", "duckduckgo_text_search", "getNowTime"}
+	searchTools := []string{"wikipedia_search", "duckduckgo_text_search", "getNowTime", "mdReader"}
 	toolAgent, err := agent.NewToolAgent("tool", searchTools)
 	if err != nil {
 		log.Fatalf("New searchAgent failed: %v", err)

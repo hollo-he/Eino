@@ -9,6 +9,7 @@ func AllToolInit() {
 	toolNames = append(toolNames, WikipediaInit())
 	toolNames = append(toolNames, DuckDuckGoInit())
 	toolNames = append(toolNames, NowTimeToolInit())
+	toolNames = append(toolNames, MdReaderToolInit())
 
 	for _, toolName := range toolNames {
 		fmt.Println("工具:", toolName, "初始化!")
